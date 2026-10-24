@@ -10,11 +10,13 @@ import logging
 import re
 from typing import Any, Dict, List, Optional
 
+import httpx
+
 try:
-    from duckduckgo_search import DDGS
+    from ddgs import DDGS
 except ImportError:
     try:
-        from ddgs import DDGS
+        from duckduckgo_search import DDGS
     except ImportError:
         DDGS = None
 
@@ -63,6 +65,32 @@ def is_search_intent(message: str) -> bool:
     return has_temporal and has_news
 
 
+async def _fetch_wikipedia_grounding(query: str) -> Optional[Dict[str, str]]:
+    """Fetch encyclopedic summary from Wikipedia REST API for verified knowledge grounding."""
+    try:
+        clean_title = query.strip().replace(" ", "_")
+        url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{clean_title}"
+        async with httpx.AsyncClient(timeout=4.0) as client:
+            resp = await client.get(
+                url,
+                headers={"User-Agent": "CognexaAI/1.0 (https://cognexa.ai; contact@cognexa.ai)"},
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                extract = data.get("extract", "")
+                title = data.get("title", query)
+                page_url = data.get("content_urls", {}).get("desktop", {}).get("page", f"https://en.wikipedia.org/wiki/{clean_title}")
+                if extract:
+                    return {
+                        "title": f"{title} (Verified Encyclopedia Knowledge)",
+                        "url": page_url,
+                        "snippet": extract,
+                    }
+    except Exception as wiki_err:
+        logger.debug("Wikipedia grounding lookup skipped: %s", wiki_err)
+    return None
+
+
 async def perform_web_search(query: str, max_results: int = 4) -> Dict[str, Any]:
     """Execute live web search and return structured results with citations."""
     clean_query = re.sub(
@@ -77,13 +105,13 @@ async def perform_web_search(query: str, max_results: int = 4) -> Dict[str, Any]
         try:
             ddgs = DDGS()
             raw_results = list(ddgs.text(clean_query, max_results=max_results))
-            for idx, item in enumerate(raw_results, start=1):
-                title = item.get("title", f"Source {idx}")
+            for item in raw_results:
+                title = item.get("title", "Web Source")
                 href = item.get("href", "")
                 body = item.get("body", "")
                 if body:
                     results.append({
-                        "index": str(idx),
+                        "index": str(len(results) + 1),
                         "title": title,
                         "url": href,
                         "snippet": body,
@@ -92,6 +120,14 @@ async def perform_web_search(query: str, max_results: int = 4) -> Dict[str, Any]
             logger.warning("DuckDuckGo web search failed for '%s': %s", clean_query, exc)
     else:
         logger.warning("Neither duckduckgo_search nor ddgs is installed.")
+
+    # Ground with verified Wikipedia knowledge if results are few or for personality/topic queries
+    if len(results) < 3:
+        wiki_data = await _fetch_wikipedia_grounding(clean_query)
+        if wiki_data:
+            results.insert(0, wiki_data)
+            for idx, item in enumerate(results, start=1):
+                item["index"] = str(idx)
 
     return {
         "query": clean_query,

@@ -328,15 +328,16 @@ class CognitiveInferenceEngine:
         # 1d. Prominent Personalities & Sports (Virat Kohli, etc.)
         if any(kw in lower for kw in ["kohli", "virat"]):
             return (
-                "### 🏏 Virat Kohli — Overview & Career Highlights\n\n"
-                "**Virat Kohli** (born 5 November 1988, Delhi, India) is an Indian international cricketer, former captain of the India national team, "
-                "and widely acclaimed as one of the greatest batsmen in modern cricket history.\n\n"
-                "#### Key Achievements & Career Milestones:\n"
-                "- **International Records**: Surpassed Sachin Tendulkar's historic tally of 49 ODI centuries by scoring his 50th ODI century at the 2023 ICC Men's Cricket World Cup.\n"
-                "- **Captaining India**: Led the Indian Test team to historic overseas triumphs, including India's first-ever Test series win in Australia (2018–19), holding the #1 Test ranking for 42 consecutive months.\n"
-                "- **Tournament Honors**: Won the 2011 ICC Cricket World Cup and 2013 ICC Champions Trophy. Awarded ICC Player of the Tournament in the 2014 & 2016 T20 World Cups and the 2023 ODI World Cup.\n"
-                "- **Indian Premier League (IPL)**: All-time leading run scorer in the IPL, playing as the cornerstone of Royal Challengers Bengaluru (RCB).\n"
-                "- **Style & Legacy**: Revered as the ultimate 'chase master' in limited-overs cricket, credited with transforming the fitness standards and athletic culture of Indian cricket."
+                "### 🏏 Virat Kohli — Profile, Modern Records & Career Highlights (2024–2026)\n\n"
+                "**Virat Kohli** (born 5 November 1988, Delhi, India) is an Indian international cricketer, former all-format captain of India, "
+                "and widely acclaimed as one of the greatest batsmen in the history of international cricket.\n\n"
+                "#### 🏆 Key Achievements & Recent Milestones:\n"
+                "- **2024 ICC Men's T20 World Cup Champion**: Delivered a match-defining knock of **76 off 59 balls** under severe pressure in the 2024 Final against South Africa in Barbados, earning the **Player of the Match** award and lifting the World Cup.\n"
+                "- **T20 International Retirement**: Announced retirement from T20 Internationals on the ultimate high immediately following the 2024 World Cup triumph.\n"
+                "- **Historic 50th ODI Century World Record**: Surpassed Sachin Tendulkar's historic milestone of 49 ODI centuries by scoring his 50th ODI ton at the ICC World Cup, holding the all-time world record with over 80+ international centuries.\n"
+                "- **IPL 2024 Orange Cap**: Top run-scorer of IPL 2024 with **741 runs** (avg 61.75, strike rate 154.69) for Royal Challengers Bengaluru (RCB).\n"
+                "- **Test Captaincy Legacy**: Led India in 68 Tests with 40 wins (the highest win rate for any Indian captain), including India's historic first-ever Test series win in Australia (2018–19) and holding the ICC #1 Test rank for 42 consecutive months.\n"
+                "- **Tournament Honors**: Won the 2011 ODI World Cup, 2013 Champions Trophy, and 2024 T20 World Cup. Awarded ICC Player of the Tournament in 2014 & 2016 (T20 World Cups) and the 2023 ODI World Cup, and crowned ICC Male Cricketer of the Decade (2010s)."
                 + memory_context_note
             )
 
