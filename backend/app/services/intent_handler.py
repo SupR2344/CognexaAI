@@ -133,20 +133,6 @@ async def handle_generative_request(
             "artifact_info": {"type": "swarm", "goal": swarm_result["goal"]},
         }
 
-    # 7. Real-Time Web Search & Live News Intent
-    try:
-        from app.services.web_search import is_search_intent, perform_web_search, format_search_response
-        if is_search_intent(message):
-            search_data = await perform_web_search(message)
-            if search_data.get("results"):
-                response_text = format_search_response(message, search_data)
-                return {
-                    "response_text": response_text,
-                    "artifact_info": {"type": "web_search", "query": message, "count": len(search_data.get("results", []))},
-                }
-    except Exception as search_err:
-        logger.warning("Real-time web search encountered an error: %s", search_err)
-
     return None
 
 

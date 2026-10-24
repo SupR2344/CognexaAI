@@ -149,6 +149,22 @@ async def chat_message(
         else []
     )
 
+    # 4a. Live Web Grounding if explicit search is requested
+    try:
+        from app.services.web_search import is_search_intent, perform_web_search
+        if is_search_intent(payload.message):
+            search_data = await perform_web_search(payload.message)
+            results = search_data.get("results", [])
+            if results:
+                web_context = "\n".join([f"[{r['index']}] {r['title']}: {r['snippet']} ({r['url']})" for r in results])
+                relevant_memories.append({
+                    "memory_type": "live_web_search_grounding",
+                    "content": f"Live Web Information Grounding for query '{payload.message}':\n{web_context}",
+                    "created_at": datetime.utcnow().isoformat(),
+                })
+    except Exception as search_err:
+        logger.warning("Web search grounding error in chat: %s", search_err)
+
     # 4b. Document RAG Retrieval if attached file is present
     try:
         from app.services.document_rag import document_rag
@@ -330,6 +346,22 @@ async def chat_stream(
         if payload.use_memory
         else []
     )
+
+    # Live Web Grounding if explicit search is requested
+    try:
+        from app.services.web_search import is_search_intent, perform_web_search
+        if is_search_intent(payload.message):
+            search_data = await perform_web_search(payload.message)
+            results = search_data.get("results", [])
+            if results:
+                web_context = "\n".join([f"[{r['index']}] {r['title']}: {r['snippet']} ({r['url']})" for r in results])
+                relevant_memories.append({
+                    "memory_type": "live_web_search_grounding",
+                    "content": f"Live Web Information Grounding for query '{payload.message}':\n{web_context}",
+                    "created_at": datetime.utcnow().isoformat(),
+                })
+    except Exception as search_err:
+        logger.warning("Web search grounding error in stream: %s", search_err)
 
     # Document RAG Retrieval if attached file is present
     try:

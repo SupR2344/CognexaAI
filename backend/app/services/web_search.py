@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def is_search_intent(message: str) -> bool:
-    """Detect whether user query explicitly or implicitly requires real-time web search or grounding."""
+    """Detect whether user query explicitly asks for real-time web search or live news."""
     lower = message.lower().strip()
 
     # 1. UI Web Search Toggle or explicit command
@@ -33,31 +33,15 @@ def is_search_intent(message: str) -> bool:
 
     explicit_triggers = [
         "search web", "search internet", "search google", "web search", "browse web",
-        "latest news", "today news", "breaking news", "live score", "aaj ka", "aaj ki",
-        "current price", "stock price", "current weather", "who won", "recent updates",
-        "kya chal raha hai", "taja khabar", "latest updates", "news on", "fact check",
-        "who is", "who was", "tell me about", "koun hai", "kaun hai", "ke baare me",
-        "biography", "career highlights", "career overview", "stats of", "records of",
+        "latest news", "today news", "breaking news", "live score", "aaj ka score",
+        "current price", "stock price", "current weather", "live updates", "taja khabar",
     ]
     if any(trig in lower for trig in explicit_triggers):
         return True
 
-    # 2. Sports / Athletes / Public Figures / Celebrities / Real-World Entities
-    entity_keywords = [
-        "rohit sharma", "virat kohli", "ms dhoni", "dhoni", "sachin tendulkar", "sachin",
-        "sharma", "bumrah", "hardik pandya", "babar azam", "cristiano ronaldo", "ronaldo",
-        "messi", "lionel messi", "elon musk", "sam altman", "narendra modi", "sundar pichai",
-        "cricketer", "captain", "icc", "bcci", "ipl", "trophy", "world cup", "champions trophy",
-        "olympics", "fifa", "ceo", "prime minister", "president of",
-    ]
-    if any(ent in lower for ent in entity_keywords):
-        return True
-
-    temporal_indicators = [
-        "today", "yesterday", "this week", "recently", "current", "latest",
-        "2024", "2025", "2026", "right now", "live", "schedule", "ranking"
-    ]
-    news_nouns = ["match", "cricket", "election", "stock", "ipo", "ai model", "release", "president", "price", "score"]
+    # 2. Live temporal news events
+    temporal_indicators = ["today", "right now", "live score", "breaking news"]
+    news_nouns = ["match", "election", "stock price", "weather", "gold rate"]
 
     has_temporal = any(re.search(rf"\b{w}\b", lower) for w in temporal_indicators)
     has_news = any(re.search(rf"\b{w}\b", lower) for w in news_nouns)
