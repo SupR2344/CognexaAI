@@ -195,6 +195,12 @@ async def get_uploaded_file(filename: str) -> Any:
     status_code=status.HTTP_200_OK,
     summary="Health check endpoint for liveness and database probing",
 )
+@app.get(
+    "/api/health",
+    tags=["system"],
+    status_code=status.HTTP_200_OK,
+    summary="Health check endpoint (alias)",
+)
 async def health_check() -> Dict[str, Any]:
     """Perform health checks on database connectivity and runtime state."""
     db_status = "connected"
