@@ -3,19 +3,17 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Brain, Loader2 } from 'lucide-react';
-import { useAuthStore } from '../stores/authStore';
 
 export default function HomePage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuthStore();
 
   useEffect(() => {
-    if (isLoading) return;
-
-    const token = typeof window !== 'undefined' ? localStorage.getItem('cognexa_token') : null;
-    const nextRoute = token || isAuthenticated ? '/chat' : '/login';
-    router.replace(nextRoute);
-  }, [isAuthenticated, isLoading, router]);
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('cognexa_token');
+      const nextRoute = token ? '/chat' : '/login';
+      router.replace(nextRoute);
+    }
+  }, [router]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#0f0f23] p-4">
@@ -29,7 +27,7 @@ export default function HomePage() {
         <p className="text-sm text-gray-400 mt-2">Initializing Cognitive Agent Environment...</p>
         <div className="mt-6 flex items-center text-xs text-[#00d2ff]">
           <Loader2 className="w-4 h-4 animate-spin mr-2" />
-          <span>Verifying session security</span>
+          <span>Redirecting to workspace...</span>
         </div>
       </div>
     </div>

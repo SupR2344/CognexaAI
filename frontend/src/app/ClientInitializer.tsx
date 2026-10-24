@@ -2,9 +2,11 @@
 
 import { useEffect } from 'react';
 import { useThemeStore } from '../stores/themeStore';
+import { useAuthStore } from '../stores/authStore';
 
 export default function ClientInitializer() {
   const setTheme = useThemeStore((s) => s.setTheme);
+  const loadUser = useAuthStore((s) => s.loadUser);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -18,8 +20,9 @@ export default function ClientInitializer() {
         document.documentElement.classList.add('light');
         setTheme('light');
       }
+      loadUser();
     }
-  }, [setTheme]);
+  }, [setTheme, loadUser]);
 
   return null;
 }
