@@ -20,8 +20,8 @@ class Settings(BaseSettings):
 
     # Database
     DATABASE_URL: str = Field(
-        default="postgresql+asyncpg://cognexa:cognexa123@localhost:5432/cognexa_db",
-        description="Async PostgreSQL connection string with asyncpg driver",
+        default="sqlite+aiosqlite:///./cognexa.db",
+        description="Async database connection string (SQLite by default, or PostgreSQL if configured)",
     )
 
     # LLM / Ollama & OpenAI / Groq Configuration

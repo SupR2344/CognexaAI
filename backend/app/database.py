@@ -155,15 +155,23 @@ async def init_db() -> None:
         else:
             raise conn_err
 
-    # Auto-seed default admin user if not present
+    # Auto-seed default admin user if not present or heal password
     try:
         async with AsyncSessionLocal() as session:
             from app.models.user import User
-            from app.auth.security import get_password_hash
-            from sqlalchemy import select
+            from app.auth.security import get_password_hash, verify_password
+            from sqlalchemy import select, func, or_
 
-            res = await session.execute(select(User).where(User.email == "admin@cognexa.ai"))
-            if not res.scalar_one_or_none():
+            res = await session.execute(
+                select(User).where(
+                    or_(
+                        func.lower(User.email) == "admin@cognexa.ai",
+                        func.lower(User.username) == "admin",
+                    )
+                )
+            )
+            admin_user = res.scalar_one_or_none()
+            if not admin_user:
                 logger.info("Auto-seeding default administrator (admin@cognexa.ai)...")
                 admin_user = User(
                     username="admin",
@@ -174,5 +182,21 @@ async def init_db() -> None:
                 session.add(admin_user)
                 await session.commit()
                 logger.info("Default administrator seeded successfully (admin@cognexa.ai / admin123).")
+            else:
+                needs_update = False
+                if not admin_user.is_active:
+                    admin_user.is_active = True
+                    needs_update = True
+                try:
+                    if not verify_password("admin123", admin_user.hashed_password):
+                        admin_user.hashed_password = get_password_hash("admin123")
+                        needs_update = True
+                except Exception:
+                    admin_user.hashed_password = get_password_hash("admin123")
+                    needs_update = True
+
+                if needs_update:
+                    await session.commit()
+                    logger.info("Default administrator account refreshed and verified successfully.")
     except Exception as seed_exc:
-        logger.warning("Could not auto-seed default user: %s", seed_exc)
+        logger.warning("Could not auto-seed or heal default user: %s", seed_exc)

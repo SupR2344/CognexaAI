@@ -7,7 +7,7 @@ and authenticated identity resolution.
 import logging
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.security import (
@@ -138,17 +138,23 @@ async def login(
             detail="Username or email and password are required",
         )
 
-    # Check against username or email
+    # Check against username or email (case-insensitive and trimmed)
+    clean_identifier = str(username).lower().strip()
     stmt = select(User).where(
         or_(
-            User.username == str(username).strip(),
-            User.email == str(username).lower().strip(),
+            func.lower(User.username) == clean_identifier,
+            func.lower(User.email) == clean_identifier,
         )
     )
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
 
-    if not user or not verify_password(password, user.hashed_password):
+    clean_pw = str(password).strip()
+    is_valid = False
+    if user:
+        is_valid = verify_password(clean_pw, user.hashed_password) or verify_password(str(password), user.hashed_password)
+
+    if not user or not is_valid:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
