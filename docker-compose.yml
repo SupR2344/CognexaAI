@@ -1,0 +1,134 @@
+services:
+  # ============================================================================
+  # PostgreSQL with pgvector Extension
+  # ============================================================================
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: cognexa-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cognexa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cognexa123}
+      POSTGRES_DB: ${POSTGRES_DB:-cognexa_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01_init_db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cognexa} -d ${POSTGRES_DB:-cognexa_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - cognexa-network
+
+  # ============================================================================
+  # Ollama Local LLM Engine
+  # ============================================================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: cognexa-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    # GPU acceleration configuration (uncomment if NVIDIA Container Toolkit is installed):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    networks:
+      - cognexa-network
+
+  # ============================================================================
+  # Cognexa FastAPI Backend
+  # ============================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: cognexa-backend:local
+    container_name: cognexa-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cognexa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cognexa123}
+      POSTGRES_DB: ${POSTGRES_DB:-cognexa_db}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-cognexa}:${POSTGRES_PASSWORD:-cognexa123}@postgres:5432/${POSTGRES_DB:-cognexa_db}
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-all-MiniLM-L6-v2}
+      SECRET_KEY: ${SECRET_KEY:-your-super-secret-key-change-in-production}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+      DOCKER_SANDBOX_IMAGE: ${DOCKER_SANDBOX_IMAGE:-cognexa-backend:local}
+      MAX_RETRIES: ${MAX_RETRIES:-3}
+      SANDBOX_TIMEOUT: ${SANDBOX_TIMEOUT:-30}
+      SANDBOX_TEST_TIMEOUT: ${SANDBOX_TEST_TIMEOUT:-180}
+      SANDBOX_VOLUME_FROM: cognexa-backend
+      WORKSPACE_ROOT: /workspace
+    group_add:
+      - ${DOCKER_GID:-999}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/tests:/app/tests
+      - .:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - cognexa-network
+
+  # ============================================================================
+  # Cognexa Next.js Frontend
+  # ============================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    container_name: cognexa-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    networks:
+      - cognexa-network
+
+# ==============================================================================
+# Networks & Persistent Volumes
+# ==============================================================================
+networks:
+  cognexa-network:
+    name: cognexa-network
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: cognexa-postgres-data
+  ollama_models:
+    name: cognexa-ollama-models

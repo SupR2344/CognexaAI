@@ -1,0 +1,10 @@
+--- Page 1 ---
+1. Explain the architecture of Apache Kafka.
+Kafka is a distributed event store and stream-processing platform. It uses topics partitioned across brokers with consumer groups.
+
+2. What is Zookeeper role in Kafka?
+Zookeeper maintains cluster membership, leader election for partitions, and topic configuration before KRaft metadata mode.
+
+--- Page 2 ---
+3. Describe Kafka Producer idempotence.
+Idempotent producers assign a Producer ID and sequence numbers to every message, ensuring exactly-once semantics per partition.

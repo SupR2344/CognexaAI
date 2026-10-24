@@ -1,0 +1,11 @@
+.env
+.env.*
+*.env
+*.env.*
+cognexa.db
+*.db
+*.db-shm
+*.db-wal
+.pytest_cache
+__pycache__
+*.py[cod]
