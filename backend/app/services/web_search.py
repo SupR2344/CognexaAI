@@ -9,7 +9,14 @@ from __future__ import annotations
 import logging
 import re
 from typing import Any, Dict, List, Optional
-from ddgs import DDGS
+
+try:
+    from duckduckgo_search import DDGS
+except ImportError:
+    try:
+        from ddgs import DDGS
+    except ImportError:
+        DDGS = None
 
 logger = logging.getLogger(__name__)
 
@@ -66,22 +73,25 @@ async def perform_web_search(query: str, max_results: int = 4) -> Dict[str, Any]
     ).strip() or query.strip()
 
     results: List[Dict[str, str]] = []
-    try:
-        ddgs = DDGS()
-        raw_results = list(ddgs.text(clean_query, max_results=max_results))
-        for idx, item in enumerate(raw_results, start=1):
-            title = item.get("title", f"Source {idx}")
-            href = item.get("href", "")
-            body = item.get("body", "")
-            if body:
-                results.append({
-                    "index": str(idx),
-                    "title": title,
-                    "url": href,
-                    "snippet": body,
-                })
-    except Exception as exc:
-        logger.warning("DuckDuckGo web search failed for '%s': %s", clean_query, exc)
+    if DDGS is not None:
+        try:
+            ddgs = DDGS()
+            raw_results = list(ddgs.text(clean_query, max_results=max_results))
+            for idx, item in enumerate(raw_results, start=1):
+                title = item.get("title", f"Source {idx}")
+                href = item.get("href", "")
+                body = item.get("body", "")
+                if body:
+                    results.append({
+                        "index": str(idx),
+                        "title": title,
+                        "url": href,
+                        "snippet": body,
+                    })
+        except Exception as exc:
+            logger.warning("DuckDuckGo web search failed for '%s': %s", clean_query, exc)
+    else:
+        logger.warning("Neither duckduckgo_search nor ddgs is installed.")
 
     return {
         "query": clean_query,
@@ -110,7 +120,7 @@ def format_search_response(query: str, search_data: Dict[str, Any]) -> str:
         title = item["title"]
         url = item["url"]
         snippet = item["snippet"]
-        response_lines.append(f"- **{title}**: {snippet} [\[{idx}\]]({url})\n")
+        response_lines.append(f"- **{title}**: {snippet} [[{idx}]]({url})\n")
 
     response_lines.append("\n#### 📚 Verified Sources & Citations:\n")
     for item in results:

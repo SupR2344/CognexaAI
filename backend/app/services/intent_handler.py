@@ -39,13 +39,16 @@ async def handle_generative_request(
     """
     # 0. Enforced Model Modes
     if model == "Deep Research Mode":
-        from app.services.web_search import perform_web_search, format_search_response
-        search_data = await perform_web_search(message)
-        response_text = format_search_response(message, search_data)
-        return {
-            "response_text": response_text,
-            "artifact_info": {"type": "search", "results_count": len(search_data.get("results", []))},
-        }
+        try:
+            from app.services.web_search import perform_web_search, format_search_response
+            search_data = await perform_web_search(message)
+            response_text = format_search_response(message, search_data)
+            return {
+                "response_text": response_text,
+                "artifact_info": {"type": "search", "results_count": len(search_data.get("results", []))},
+            }
+        except Exception as deep_err:
+            logger.warning("Deep Research search encountered an error: %s", deep_err)
 
     if model == "Multi-Agent Swarm":
         from app.services.agent_swarm import execute_swarm_collaboration
@@ -131,15 +134,18 @@ async def handle_generative_request(
         }
 
     # 7. Real-Time Web Search & Live News Intent
-    from app.services.web_search import is_search_intent, perform_web_search, format_search_response
-    if is_search_intent(message):
-        search_data = await perform_web_search(message)
-        if search_data.get("results"):
-            response_text = format_search_response(message, search_data)
-            return {
-                "response_text": response_text,
-                "artifact_info": {"type": "web_search", "query": message, "count": len(search_data.get("results", []))},
-            }
+    try:
+        from app.services.web_search import is_search_intent, perform_web_search, format_search_response
+        if is_search_intent(message):
+            search_data = await perform_web_search(message)
+            if search_data.get("results"):
+                response_text = format_search_response(message, search_data)
+                return {
+                    "response_text": response_text,
+                    "artifact_info": {"type": "web_search", "query": message, "count": len(search_data.get("results", []))},
+                }
+    except Exception as search_err:
+        logger.warning("Real-time web search encountered an error: %s", search_err)
 
     return None
 

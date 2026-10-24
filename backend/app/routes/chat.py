@@ -165,14 +165,18 @@ async def chat_message(
         logger.warning("RAG retrieval skipped in chat: %s", rag_err)
 
     # 5. Check if user requested a generative engineering artifact or active model mode
-    from app.services.intent_handler import handle_generative_request
-    gen_result = await handle_generative_request(
-        payload.message,
-        user_id=current_user.id,
-        db=db,
-        conversation_history=history_payload,
-        model=payload.model,
-    )
+    gen_result = None
+    try:
+        from app.services.intent_handler import handle_generative_request
+        gen_result = await handle_generative_request(
+            payload.message,
+            user_id=current_user.id,
+            db=db,
+            conversation_history=history_payload,
+            model=payload.model,
+        )
+    except Exception as gen_err:
+        logger.warning("Generative intent handler error in chat_message: %s", gen_err)
 
     task_created = False
     task_id = None
@@ -350,14 +354,18 @@ async def chat_stream(
         try:
             # Check if user requested a generative engineering artifact or active model mode
             import asyncio
-            from app.services.intent_handler import handle_generative_request
-            gen_result = await handle_generative_request(
-                payload.message,
-                user_id=current_user.id,
-                db=db,
-                conversation_history=history_payload,
-                model=payload.model,
-            )
+            gen_result = None
+            try:
+                from app.services.intent_handler import handle_generative_request
+                gen_result = await handle_generative_request(
+                    payload.message,
+                    user_id=current_user.id,
+                    db=db,
+                    conversation_history=history_payload,
+                    model=payload.model,
+                )
+            except Exception as gen_err:
+                logger.warning("Generative intent handler error in stream: %s", gen_err)
 
             if gen_result and gen_result.get("response_text"):
                 response_text = gen_result["response_text"]
