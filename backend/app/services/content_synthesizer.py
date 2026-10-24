@@ -645,6 +645,145 @@ KNOWLEDGE_REGISTRY: Dict[str, Dict[str, Any]] = {
             },
         ],
     },
+    "generative_ai_transformers": {
+        "title": "Generative AI, Large Language Models & Modern Transformer Architectures",
+        "summary": (
+            "Generative AI represents the frontier of machine learning, driven by Transformer neural network architectures, "
+            "self-attention mechanisms, and scalable self-supervised pre-training over internet-scale corpora."
+        ),
+        "sections": [
+            {
+                "heading": "Section 1: Transformer Architecture & Multi-Head Self-Attention",
+                "content": "The Transformer discards recurrence and convolutions entirely, computing pairwise token dependencies in parallel across the sequence.",
+                "points": [
+                    "Scaled Dot-Product Attention: Formulated as Attention(Q, K, V) = softmax(Q K^T / sqrt(d_k)) V. Scales queries and keys to prevent dot-products from growing excessively large, avoiding vanishing gradients.",
+                    "Multi-Head Attention: Projects queries, keys, and values into h distinct representation subspaces, enabling the model to simultaneously attend to syntax, semantics, and long-range dependencies.",
+                    "Positional Encoding: Since attention is permutation-invariant, positional information is injected using sinusoidal frequencies or Rotary Position Embeddings (RoPE), permitting relative distance preservation across extended context windows.",
+                    "Feed-Forward Sub-layers & Normalization: Alternates multi-head attention with point-wise feed-forward networks (SwiGLU) stabilized by Pre-LayerNorm (RMSNorm) and residual skip-connections.",
+                ],
+            },
+            {
+                "heading": "Section 2: Pre-training, Fine-Tuning & Alignment Paradigms (RLHF & DPO)",
+                "content": "Modern foundation models progress through a three-stage lifecycle: unsupervised pre-training, supervised instruction tuning, and human preference alignment.",
+                "points": [
+                    "Causal Language Modeling: Autoregressive next-token prediction over trillions of tokens utilizing causal attention masks to prohibit future information leakage.",
+                    "Parameter-Efficient Fine-Tuning (PEFT & LoRA): Low-Rank Adaptation decomposes weight updates into low-rank matrices W = W_0 + B A, drastically cutting trainable parameters by 99% while freezing base weights.",
+                    "RLHF & Direct Preference Optimization (DPO): Aligns generative policies with human values (Helpful, Honest, Harmless). DPO optimizes closed-form log-likelihood ratios directly over preference pairs without needing an unstable separate reward model or PPO training.",
+                    "Retrieval-Augmented Generation (RAG): Combines dense vector retrieval with foundation models to eliminate hallucinations and ground responses in real-time private documentation.",
+                ],
+            },
+        ],
+    },
+    "computer_networks": {
+        "title": "Computer Networks, Internet Protocols & High-Throughput Communications",
+        "summary": (
+            "Computer networking encompasses the architectural design, layered communication protocols, and routing algorithms "
+            "that interconnect heterogeneous distributed computational nodes globally."
+        ),
+        "sections": [
+            {
+                "heading": "Section 1: OSI 7-Layer Model vs TCP/IP Architecture",
+                "content": "Network architectures modularize communication tasks into hierarchical layers with distinct functional abstraction boundaries.",
+                "points": [
+                    "OSI Reference Hierarchy: Physical (bits/cabling), Data Link (frames/MAC/switching), Network (packets/IP/routing), Transport (segments/TCP/UDP), Session (dialogue control), Presentation (encoding/TLS), and Application (HTTP/DNS).",
+                    "TCP/IP Pragmatic Stack: Collapses the model into 4 tiers: Link Layer, Internet Layer (IPv4/IPv6), Transport Layer, and Application Layer.",
+                    "Encapsulation & Decapsulation: As payload data traverses down the protocol stack, each layer prepends a protocol control information (PCI) header until transmitted as a physical bitstream.",
+                ],
+            },
+            {
+                "heading": "Section 2: Transport Protocols, Congestion Control & Evolution (TCP, UDP, QUIC, HTTP/3)",
+                "content": "Reliable and high-speed data transmission relies on adaptive flow control, congestion avoidance, and multiplexed streams.",
+                "points": [
+                    "TCP Mechanics: Connection-oriented 3-way handshake (SYN, SYN-ACK, ACK), sliding window flow control, and cumulative acknowledgments guaranteeing ordered in-sequence delivery.",
+                    "Congestion Avoidance: Algorithms like TCP CUBIC and BBR dynamically probe network bandwidth and round-trip time (RTT) to prevent bufferbloat and network packet collapse.",
+                    "UDP vs QUIC (HTTP/3): UDP offers connectionless, low-overhead datagram streaming. QUIC implements user-space transport over UDP, solving head-of-line blocking, enabling 0-RTT connection resumption, and merging TLS 1.3 encryption natively.",
+                ],
+            },
+        ],
+    },
+    "system_design_distributed_systems": {
+        "title": "Distributed Systems, High-Availability System Design & Fault Tolerance",
+        "summary": (
+            "Distributed systems coordinate autonomous computing nodes over an asynchronous network to function as a unified, "
+            "fault-tolerant, scalable computing environment under partial failure regimes."
+        ),
+        "sections": [
+            {
+                "heading": "Section 1: Fundamental Theorems (CAP, PACELC) & Consistency Models",
+                "content": "System design trade-offs govern latency, availability, and state synchronization across network partitions.",
+                "points": [
+                    "CAP Theorem: In a distributed data store subjected to network partitioning (P), a system must trade off between Strong Consistency (C) and High Availability (A).",
+                    "PACELC Extension: Even when no partition occurs (E), systems trade off Latency (L) versus Consistency (C).",
+                    "Consistency Spectrum: Ranges from Strict Linearizability (every read observes the latest write globally) to Eventual Consistency (replicas converge to identical state after write propagation ceases).",
+                    "Distributed Consensus (Raft & Paxos): Quorum-based leader election and replicated state machine log commitment ensuring crash fault tolerance.",
+                ],
+            },
+            {
+                "heading": "Section 2: Scaling Patterns: Sharding, Caching, Event-Driven Architectures",
+                "content": "Enterprise microservice topologies employ decentralized data management and asynchronous message pipelines.",
+                "points": [
+                    "Consistent Hashing: Distributes data keys across a virtual hash ring; adding or removing nodes only re-keys K/N keys rather than complete rehashing.",
+                    "Multi-Tier Caching Strategies: In-memory distributed caching (Redis) utilizing Cache-Aside, Write-Through, or Write-Behind policies with strict TTL and LRU/LFU eviction.",
+                    "Asynchronous Event Brokers: Decouples microservice producers and consumers via distributed commit logs (Apache Kafka) guaranteeing at-least-once or exactly-once semantics.",
+                ],
+            },
+        ],
+    },
+    "world_history_modern_eras": {
+        "title": "Modern World History & Landmark Geopolitical Eras (1950 to Present)",
+        "summary": (
+            "The post-1950 epoch witnessed the transformation of global geopolitics through decolonization, "
+            "Cold War ideological polarization, democratic constitutionalism, and rapid technological revolutions."
+        ),
+        "sections": [
+            {
+                "heading": "Section 1: The 1950 Watershed: Global Rebuilding, Decolonization & New Constitutions",
+                "content": "The year 1950 marked a critical turning point in global sovereignty and the restructuring of international governance.",
+                "points": [
+                    "India's Constitutional Sovereignty (26 January 1950): India formally enacted its Constitution, transforming from a British Dominion into a sovereign, democratic republic with Dr. Rajendra Prasad as its first President and Jawaharlal Nehru as Prime Minister.",
+                    "The Korean War Outbreak (June 1950): The invasion of South Korea triggered the first major armed conflict of the Cold War, solidifying the ideological confrontation between the Western Bloc (UN/US) and Eastern Communist Bloc.",
+                    "Decolonization Wave: African and Asian independence movements gained unstoppable momentum, dismantling European colonial empires and giving birth to the Non-Aligned Movement (NAM).",
+                    "Technological & Scientific Foundations: Alan Turing published 'Computing Machinery and Intelligence' introducing the Turing Test; the first electronic digital computers entered practical institutional operation.",
+                ],
+            },
+            {
+                "heading": "Section 2: The Digital Revolution, Space Race & Multipolar World Order",
+                "content": "The late 20th and early 21st centuries redefined human civilization through space exploration, computing, and economic globalization.",
+                "points": [
+                    "Space Exploration Epoch: The launch of Sputnik (1957) and Apollo 11 Moon landing (1969) propelled scientific frontiers and satellite telecommunications.",
+                    "Information Age Transition: Silicon semiconductor inventions, the creation of ARPANET/Internet, personal computing, and the World Wide Web fundamentally decentralized global knowledge sharing.",
+                    "Geopolitical Evolution: The collapse of the Soviet Union (1991), the rise of Asian economic powerhouses, and the contemporary transition toward a multipolar, AI-driven global infrastructure.",
+                ],
+            },
+        ],
+    },
+    "indian_polity_constitution": {
+        "title": "Constitution of India, Constitutional Law & Governance Framework",
+        "summary": (
+            "The Constitution of India is the supreme lex loci of the Republic of India, standing as the longest written "
+            "national constitution in the world, embodying constitutional morality, rule of law, and democratic pluralism."
+        ),
+        "sections": [
+            {
+                "heading": "Section 1: Historical Framing, Philosophy & The Preamble",
+                "content": "Formulated by the Constituent Assembly under the drafting chairmanship of Dr. B.R. Ambedkar, the Constitution represents an emancipatory social contract.",
+                "points": [
+                    "Genesis & Enactment: Adopted on 26 November 1949 and entering full operational force on 26 January 1950, commemorating the 1930 Purna Swaraj declaration.",
+                    "The Preamble's Ideals: Declares India to be a 'Sovereign Socialist Secular Democratic Republic' committed to securing Justice, Liberty, Equality, and Fraternity.",
+                    "Basic Structure Doctrine (Kesavananda Bharati, 1973): Landmark Supreme Court jurisprudence establishing that Parliament's amending power under Article 368 cannot abrogate fundamental constitutional pillars (judicial review, federalism, secularism).",
+                ],
+            },
+            {
+                "heading": "Section 2: Fundamental Rights, Directive Principles & Separation of Powers",
+                "content": "The constitutional mechanism balances individual liberties against collective welfare through checks and balances.",
+                "points": [
+                    "Fundamental Rights (Part III, Articles 12–35): Legally enforceable civil liberties including Right to Equality (Art. 14–18), Right to Freedom (Art. 19), Right to Life and Personal Liberty (Art. 21), and Constitutional Remedies (Art. 32 / Writs: Habeas Corpus, Mandamus, Quo Warranto, Prohibition, Certiorari).",
+                    "Directive Principles of State Policy (Part IV): Non-justiciable socio-economic charter guiding legislative governance toward establishing a welfare state.",
+                    "Tripartite Separation of Powers: Executive (President and Prime Minister-led Council of Ministers), Legislature (Bicameral Parliament: Lok Sabha and Rajya Sabha), and an Independent Integrated Judiciary (Supreme Court and High Courts).",
+                ],
+            },
+        ],
+    },
 }
 
 
@@ -665,7 +804,37 @@ def _match_curated_knowledge(topic: str) -> Optional[Dict[str, Any]]:
         return KNOWLEDGE_REGISTRY["machine_learning"]
     if any(k in t_lower for k in ["big data", "hadoop", "spark", "hdfs", "data engineering", "mapreduce"]):
         return KNOWLEDGE_REGISTRY["big_data_analytics"]
-    if any(k in t_lower for k in ["deep learning", "neural network", "cnn", "rnn", "transformer", "llm"]):
+    if any(k in t_lower for k in [
+        "generative ai", "genai", "transformer", "self-attention", "llm", "large language model",
+        "lora", "qlora", "dpo", "rlhf", "rag", "retrieval augmented"
+    ]):
+        return KNOWLEDGE_REGISTRY["generative_ai_transformers"]
+
+    if any(k in t_lower for k in [
+        "network", "networking", "osi model", "tcp/ip", "tcp", "udp", "quic", "http/3",
+        "dns", "router", "routing", "ip address", "congestion control"
+    ]):
+        return KNOWLEDGE_REGISTRY["computer_networks"]
+
+    if any(k in t_lower for k in [
+        "system design", "distributed system", "distributed systems", "cap theorem", "pacelc",
+        "consistent hashing", "raft", "paxos", "sharding", "kafka", "event driven"
+    ]):
+        return KNOWLEDGE_REGISTRY["system_design_distributed_systems"]
+
+    if any(k in t_lower for k in [
+        "1950", "history", "cold war", "korean war", "decolonization", "space race",
+        "modern era", "world history", "20th century"
+    ]):
+        return KNOWLEDGE_REGISTRY["world_history_modern_eras"]
+
+    if any(k in t_lower for k in [
+        "constitution", "indian constitution", "preamble", "fundamental rights", "dr ambedkar",
+        "article 21", "article 32", "writs", "directive principles", "polity", "indian polity"
+    ]):
+        return KNOWLEDGE_REGISTRY["indian_polity_constitution"]
+
+    if any(k in t_lower for k in ["deep learning", "neural network", "cnn", "rnn"]):
         return KNOWLEDGE_REGISTRY["deep_learning"]
     if any(k in t_lower for k in ["cloud", "aws", "kubernetes", "k8s", "docker", "microservice", "serverless"]):
         return KNOWLEDGE_REGISTRY["cloud_computing"]

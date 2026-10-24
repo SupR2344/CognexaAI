@@ -198,5 +198,54 @@ async def init_db() -> None:
                 if needs_update:
                     await session.commit()
                     logger.info("Default administrator account refreshed and verified successfully.")
+
+            # Auto-seed foundational verified knowledge into user memory if empty
+            try:
+                from app.models.memory import Memory, MemoryType
+                mem_count_res = await session.execute(
+                    select(func.count(Memory.id)).where(Memory.user_id == admin_user.id)
+                )
+                count = mem_count_res.scalar() or 0
+                if count == 0:
+                    from app.services.embedding import get_embedding
+                    seed_knowledge = [
+                        (
+                            "Cognexa Autonomous System Architecture: Multi-tier microservice combining LangGraph state machines, pgvector/SQLite vector embeddings, and sandboxed execution environments.",
+                            {"category": "architecture", "domain": "software_engineering"}
+                        ),
+                        (
+                            "Distributed Systems Core Theorems: CAP Theorem dictates trade-offs between Consistency and Availability during network partitions; PACELC extends this to Latency vs Consistency under normal operation.",
+                            {"category": "distributed_systems", "domain": "system_design"}
+                        ),
+                        (
+                            "Modern Transformer & LLM Foundations: Scaled Dot-Product Attention Attention(Q, K, V) = softmax(QK^T / sqrt(d_k))V with Rotary Position Embeddings (RoPE) and Direct Preference Optimization (DPO).",
+                            {"category": "ai", "domain": "generative_ai"}
+                        ),
+                        (
+                            "1950 Global Epoch & Constitutional Sovereignty: Enactment of the Constitution of India on 26 January 1950 founding the Republic; start of the Korean War; Alan Turing's introduction of the Turing Test.",
+                            {"category": "history", "domain": "world_history"}
+                        ),
+                        (
+                            "Full-Stack Web Engineering Standards: Next.js 14 App Router with React Server Components, FastAPI async endpoints with Pydantic contracts, and Server-Sent Events (SSE) streaming.",
+                            {"category": "fullstack", "domain": "web_development"}
+                        ),
+                    ]
+                    for content, meta in seed_knowledge:
+                        emb = get_embedding(content)
+                        session.add(
+                            Memory(
+                                user_id=admin_user.id,
+                                memory_type=MemoryType.verified_knowledge.value,
+                                content=content,
+                                confidence=0.98,
+                                embedding=emb,
+                                metadata_=meta,
+                                is_active=True,
+                            )
+                        )
+                    await session.commit()
+                    logger.info("Foundational verified knowledge memories seeded successfully.")
+            except Exception as mem_seed_err:
+                logger.warning("Could not auto-seed verified knowledge memories: %s", mem_seed_err)
     except Exception as seed_exc:
         logger.warning("Could not auto-seed or heal default user: %s", seed_exc)

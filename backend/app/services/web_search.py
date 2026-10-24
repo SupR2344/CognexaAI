@@ -50,20 +50,33 @@ def is_search_intent(message: str) -> bool:
 
 
 async def _fetch_wikipedia_grounding(query: str) -> Optional[Dict[str, str]]:
-    """Fetch encyclopedic summary from Wikipedia REST API for verified knowledge grounding."""
+    """Fetch encyclopedic summary from Wikipedia REST API using search resolution."""
+    headers = {"User-Agent": "CognexaAI/2.0 (https://cognexa.ai; contact@cognexa.ai)"}
     try:
-        clean_title = query.strip().replace(" ", "_")
-        url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{clean_title}"
-        async with httpx.AsyncClient(timeout=4.0) as client:
-            resp = await client.get(
-                url,
-                headers={"User-Agent": "CognexaAI/1.0 (https://cognexa.ai; contact@cognexa.ai)"},
-            )
+        clean = query.strip()
+        async with httpx.AsyncClient(timeout=4.5) as client:
+            # 1. Resolve query to exact Wikipedia article title using search API
+            search_url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={clean}&utf8=&format=json&srlimit=1"
+            s_resp = await client.get(search_url, headers=headers)
+            target_title = None
+            if s_resp.status_code == 200:
+                s_data = s_resp.json()
+                items = s_data.get("query", {}).get("search", [])
+                if items:
+                    target_title = items[0].get("title")
+
+            if not target_title:
+                target_title = clean.replace(" ", "_")
+
+            # 2. Fetch authoritative summary
+            t_slug = target_title.replace(" ", "_")
+            summary_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{t_slug}"
+            resp = await client.get(summary_url, headers=headers)
             if resp.status_code == 200:
                 data = resp.json()
                 extract = data.get("extract", "")
-                title = data.get("title", query)
-                page_url = data.get("content_urls", {}).get("desktop", {}).get("page", f"https://en.wikipedia.org/wiki/{clean_title}")
+                title = data.get("title", target_title)
+                page_url = data.get("content_urls", {}).get("desktop", {}).get("page", f"https://en.wikipedia.org/wiki/{t_slug}")
                 if extract:
                     return {
                         "title": f"{title} (Verified Encyclopedia Knowledge)",
@@ -71,7 +84,7 @@ async def _fetch_wikipedia_grounding(query: str) -> Optional[Dict[str, str]]:
                         "snippet": extract,
                     }
     except Exception as wiki_err:
-        logger.debug("Wikipedia grounding lookup skipped: %s", wiki_err)
+        logger.debug("Wikipedia grounding search lookup skipped: %s", wiki_err)
     return None
 
 
